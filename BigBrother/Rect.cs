@@ -11,15 +11,15 @@ namespace BigBrother
     public struct Rect
     {
         [FieldOffset(0)]
-        public int left;
+        public int Left;
 
         [FieldOffset(4)]
-        public int top;
+        public int Top;
 
         [FieldOffset(8)]
-        public int right;
+        public int Right;
 
         [FieldOffset(12)]
-        public int bottom;
+        public int Bottom;
     }
 }

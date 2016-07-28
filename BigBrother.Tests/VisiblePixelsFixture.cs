@@ -20,45 +20,13 @@ namespace BigBrother.Tests
             visibleDesktop.Add(Screen.AllScreens.Select(scr => scr.Bounds).Aggregate(Rectangle.Union));
 
             var shellWindow = WinApi.GetShellWindow();
-            var windows = new List<WindowInfo>();
-
-            WinApi.EnumWindows((hWnd, lParam) =>
-            {
-                int len = WinApi.GetWindowTextLength(hWnd);
-                if (hWnd != shellWindow && WinApi.IsWindowVisible(hWnd) && len != 0)
-                {
-                    var windowInfo = new WindowInfo()
-                    {
-                        Handle = hWnd
-                    };
-
-                    var sb = new StringBuilder(len);
-                    WinApi.GetWindowText(hWnd, sb, len + 1);
-                    windowInfo.TitleText = sb.ToString();
-
-                    var rect1 = new Rect();
-                    using (var graphics = Graphics.FromHwnd(hWnd))
-                    {
-                        windowInfo.RegionType = WinApi.GetClipBox(graphics.GetHdc(), ref rect1);
-                    }
-
-                    var rect2 = new Rect();
-                    WinApi.GetWindowRect(windowInfo.Handle, ref rect2);
-
-                    windowInfo.Height = rect2.bottom - rect2.top;
-                    windowInfo.Width = rect2.right - rect2.left;
-
-                    windows.Add(windowInfo);
-                }
-
-                return true;
-            }, 0);
+            var windows = WindowInfo.GetOpenWindows();
 
             foreach (var openWindow in windows)
             {
                 var rect3 = new Rect();
                 WinApi.GetWindowRect(openWindow.Handle, ref rect3);
-                var windowArea = new Rectangle(rect3.left, rect3.top, rect3.right - rect3.left, rect3.bottom - rect3.top);
+                var windowArea = new Rectangle(rect3.Left, rect3.Top, rect3.Right - rect3.Left, rect3.Bottom - rect3.Top);
                 var areasToRemove = new List<Rectangle>();
                 var areasToAdd = new List<Rectangle>();
 
@@ -139,8 +107,9 @@ namespace BigBrother.Tests
             var openWindows = GetOpenWindows();
 
             var visualStudio = openWindows.Where(win => {
-                return win.TitleText.EndsWith("Microsoft Visual Studio") &&
-                    win.TitleText.Contains("BigBrother");
+                string titleText = win.TitleText.ToLower();
+                return titleText.EndsWith("microsoft visual studio") &&
+                    titleText.Contains("bigbrother");
             }).FirstOrDefault();
 
             double visiblePercent = (double)visualStudio.VisiblePixels / (double)(visualStudio.Width * visualStudio.Height);
